@@ -327,7 +327,7 @@ cv.best_score_, cv.best_params_
 
 model = GradientBoostingClassifier()
 
-grid = {'max_depth':[3,5,8], "n_estimators":[100, 200]}
+grid = {'max_depth':[3,5,8], "n_estimators":[50, 100]}
 
 #El tiempo de ejecución es muy alto (aún usando los dos núcleos del procesador),
 #por lo que decidimos no crear un grid excesivamente grande. 
@@ -339,23 +339,69 @@ cv.fit(X, y)
 cv.best_score_, cv.best_params_
 
 
-# In[ ]:
-
-
-
-
+# Aunque para ambos modelos obtenemos resultados parecidos, Gradient Boosting Classifier alcanza la mayor precisión [0.798] entre todas las posibilidades analizadas para un máximo de 8 nodos en el árbol y un número de 100 estimadores.
 
 # In[ ]:
 
 
+cv.best_estimator_
 
+
+# ## Ejemplo:
+# Veamos ahora qué tal predice el mejor modelo encontrado con GridSearchCV para el ejemplo anteriormente seleccionado.
+# 
+# * Recordemos que 'Fair', 'Good', 'Very Good', 'Premium' y 'Ideal' se corresponden con los números del 0 al 4 respectivamente. 
+
+# In[ ]:
+
+
+y_pred = cv.predict(X_2)
 
 
 # In[ ]:
 
 
+cv.score(X_2, y_2) #Obtenemos una accuracy buena (en relación a los resultados que hemos ido teniendo)
 
 
+# In[ ]:
+
+
+from sklearn.metrics import confusion_matrix
+
+print(confusion_matrix(y_2, y_pred))
+print('')
+print('Fair, Good, Very Good, Premium, Ideal')
+
+
+# In[ ]:
+
+
+my_array = confusion_matrix(y_2, y_pred)
+
+
+# Como no es una variable binaria no hay un comando de python que extraiga directamente falsos negativos, falsos positivos, etc., por lo que lo programamos.
+
+# In[ ]:
+
+
+#Verdaderos cortes tipo j mal clasificados como i
+cortes = ['Fair','Good','Very Good', 'Premium', 'Ideal'] 
+print('False discovery rate:') #Tasa de error tipo I
+for j in range(0,5):
+    print('El porcentaje de diamantes de tipo', cortes[j], 'mal clasificados es del', 1 - my_array[j,j]/my_array[:,j].sum())
+
+
+# In[ ]:
+
+
+#Verdaderos cortes tipo mal clasificados como i
+print('False omission rate:') #Tasa error tipo II
+for i in range(0,5):
+    print('El porcentaje de diamantes mal clasificados como',cortes[i],'es del', 1 - my_array[i,i]/my_array[i,:].sum())
+
+
+# Las calidades que clasifica mejor son 'Fair' e 'Ideal', es decir, los dos extremos. Por otro lado, podemos ver que el modelo confunde más frecuentemente las calidades medias tanto como falsos negativos como falsos positivios (mirando dos a dos los tipos de corte), principalmente si son calidades contiguas. En total, la calidad que peor clasifica el modelo es 'Very Good', es decir, la calidad media, que incluso confunde en no pocas ocasiones con la máxima calidad, 'Ideal' (vemos que tiene una *false discovery rate* de 30% y una *false omission rate* del 40%).
 
 # ### 3. Conclusiones
 # 
