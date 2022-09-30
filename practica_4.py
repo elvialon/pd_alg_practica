@@ -327,7 +327,7 @@ cv.best_score_, cv.best_params_
 
 model = GradientBoostingClassifier()
 
-grid = {'max_depth':[3,5,8], "n_estimators":[200, 300]}
+grid = {'max_depth':[3,5,8], "n_estimators":[50, 100]}
 
 #El tiempo de ejecución es muy alto (aún usando los dos núcleos del procesador),
 #por lo que decidimos no crear un grid excesivamente grande. 
