@@ -22,6 +22,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import GridSearchCV
 
 
 # ## Práctica 4: dataset libre
@@ -237,22 +238,124 @@ X_train, X_test, y_train, y_test =train_test_split(X,y)
 
 # ### 2. Uso y validación de modelos
 # 
-# Basándote ahora en ```scikit-learn``` aplica los modelos que consideres oportunos para ver qué tal predicen.
-# Un esquema podría ser el siguiente:
+# Bansádonos ahora en ```scikit-learn``` comparamos cuatro modelos de clasificación distintos para predecir la calidad del corte en función de las demás variables (excepto el precio):
 # 
-# * Probar tres modelos distintos de forma preliminar.
+# * Decision Tree Classifier
+# * Random Forest Classifier
+# * Gradient Boosting Classifier
+# * MLP Classifier
 # 
-# * Para el mejor de de los anteriores, hacer ya una CV más en profundidad con búsqueda de hiperparámetros para tratar de mejorarlo.
+# En primer lugar probaremos los cuatro modelos de forma preliminar y, según las precisiones obtenidas, haremos una validación cruzada en más profundidad en los modelos que parezcan ser más fiables.
 # 
-# * Si lo consideras razonable, puedes hacer reescalados, reducción de dimensionalidad etc.
+# Decidimos, porque creemos más conveniente, no reducir la dimensionalidad de los datos ni realizar un escalado.
+
+# In[ ]:
+
+
+from sklearn.tree import DecisionTreeClassifier
+
+model =DecisionTreeClassifier()
+model.fit(X_train, y_train)
+
+model.score(X_test,y_test)
+
+
+# RandomForestClassifier es un "meta-estimador" que se ajusta a varios árboles de clasificación en varias submuestras del data frame y utiliza el promedio para mejorar la precisión predictiva y controlar el sobreajuste.
+
+# In[ ]:
+
+
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+
+model.score(X_test,y_test)
+
+
+# GradientBoostingClassifier construye un modelo *forward* aditivo por etapas; permite la optimización de la función de pérdida. En cada etapa, los árboles de regresión se ajustan en el gradiente negativo de la función de pérdida.
+
+# In[ ]:
+
+
+from sklearn.ensemble import GradientBoostingClassifier
+
+model = GradientBoostingClassifier()
+model.fit(X_train, y_train)
+
+model.score(X_test,y_test)
+
+
+# Multi-layer Perceptron classifier optimiza la función de pérdida usando como solver LBFGS, stochastic gradient descent o adam (adam por defecto).
+
+# In[ ]:
+
+
+from sklearn.neural_network import MLPClassifier #Redes neuronales
+
+model = MLPClassifier(max_iter=500)
+model.fit(X_train, y_train)
+
+model.score(X_test,y_test)
+
+
+# Según las accuracies obtenidas, decidimos analizar más detenidamente la aplicación del Random Forest Classifier [0.783] y el Gradient Boosting Classifier [0.767].
 # 
-# * Opcionalmente puedes usar modelos no vistos en la asignatura, la lista completa está aquí https://scikit-learn.org/stable/supervised_learning.html
-# 
-# * Aunque la extensión de lo anterior es variable: si tus datos son muy fáciles de tratar, puedes profundizar más en esta fase de modelos. Si tus datos son costosos de preprocesar, puedes reducir el número de modelos de esta fase..
-# 
-# * Aparte de evaluar alguna métrica, también puedes seleccionar o construir ejemplos concretos y examinar sus predicciones.
-# 
-# El resultado de esta fase debería ser unas estimaciones de las métricas que creas convenientes para cada configuración de los modelos. También puedes hacer visualizaciones sobre las métricas.
+# Observación: durante la creación del código este proceso se ha realizado varias veces con distintos conjuntos de train y test (en concreto, 7) y siempre se ha obtienido el mismo orden de los modelos según la accuracy. El modelo que más variaciones ha experimentado es la red neuronal (MLP Classifier), habiendo obtenido una accuracy máxima de 0.722 y una mínima de 0.581. No sabemos por qué funciona peor que los demás modelos, ya que las NN actúan como cajas negras. Quizá ajustando los parámetros de la red podría mejorarse algo el resultado, sin embargo, creemos más razonable centrarnos en los dos modelos anteriormente mencionados.
+
+# ### Ajuste de parámetros
+# #### Random Forest Classifier:
+
+# In[ ]:
+
+
+model = RandomForestClassifier(n_jobs=-1)
+
+grid = {'max_depth': [5,10,20,50], "n_estimators": [200, 300, 400]}
+
+cv = GridSearchCV(estimator=model, param_grid=grid, scoring='accuracy',cv=10, n_jobs=-1)
+
+cv.fit(X, y)
+
+cv.best_score_, cv.best_params_
+
+
+# #### Gradient Boosting Classifier:
+
+# In[ ]:
+
+
+model = GradientBoostingClassifier()
+
+grid = {'max_depth':[3,5,8], "n_estimators":[100, 200]}
+
+#El tiempo de ejecución es muy alto (aún usando los dos núcleos del procesador),
+#por lo que decidimos no crear un grid excesivamente grande. 
+
+cv = GridSearchCV(estimator=model, param_grid=grid, scoring='accuracy',cv=10, n_jobs=-1)
+
+cv.fit(X, y)
+
+cv.best_score_, cv.best_params_
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
 
 # ### 3. Conclusiones
 # 
