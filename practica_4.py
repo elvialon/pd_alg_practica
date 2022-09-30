@@ -21,6 +21,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from sklearn.preprocessing import LabelEncoder
+
 
 # ## Práctica 4: dataset libre
 # 
@@ -104,15 +106,67 @@ diamonds.head() #depth y table son interaciones no lineales de x,y,z
 
 # ### 1. Exploración y tratamiento de datos
 
-# Basándote en las librerías ```numpy```, ```pandas``` y ```matplotlib``` haz las operaciones que creas convenientes y te ayuden a comprender mejor tu dataset y la tarea de clasificación/correspondiente. Para ello, algunos tipos de cosas que puedes poner:
-# 
-# * Operaciones como estadísticos o filtrados/groupby/merge de pandas para calcular información de interés.
-# 
-# * Visualizaciones con matplotlib de alguna(s) columna(s).
-# 
-# * "Arreglo" de datos: imputación de missings y outliers, calcular nuevas columnas a partir de las originales, etc.
-# 
-# El resultado de esta fase debería ser la definición de un conjunto de columnas que usarás como features (X) y otra columna que usarás como variable a predecir (y).
+# In[ ]:
+
+
+#Comprobamos que no hay valores ausentes en ninguna de las columnas.
+ausentes=diamonds.isnull().sum()
+ausentes
+
+
+# In[ ]:
+
+
+df = diamonds
+
+
+# In[ ]:
+
+
+#Para poder aplicar los distintos modelos las columnas cut, color y clarity deben ser expresadas numéricamente.
+le = LabelEncoder()
+
+
+# En las columnas 'cut' y 'clarity' decidimos no usar LabelEncoder porque al ordenar alfabéticamente las categorias perdemos el orden original.
+
+# In[ ]:
+
+
+df['cut'] = df['cut'].apply(lambda x: ['Fair','Good','Very Good', 'Premium', 'Ideal'].index(x))
+print('Fair, Good, Very Good, Premium, Ideal se corresponden con los números del 0 al 4 respectivamente.')
+
+
+# In[ ]:
+
+
+df.color = le.fit_transform(diamonds.color)
+print(list(le.classes_), 'se corresponden con los números del 0 al 6 respectivamente.')
+
+
+# In[ ]:
+
+
+df['clarity'] = df['clarity'].apply(lambda x: ['I1', 'SI2', 'SI1', 'VS2', 'VS1', 'VVS2', 'VVS1', 'IF'].index(x))
+print('I1 (peor), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (mejor) se corresponden con los números del 0 al 7 respectivamente.')
+
+
+# In[ ]:
+
+
+df.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
 
 # ### 2. Uso y validación de modelos
 # 
