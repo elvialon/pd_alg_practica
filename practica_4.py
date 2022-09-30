@@ -159,13 +159,80 @@ df.head()
 # In[ ]:
 
 
+fig, ([ax1,ax2,ax3],[ax4,ax5, ax6]) = plt.subplots(nrows = 2, ncols=3, figsize=(20,10))   
 
+ax1.hist(df.cut, label=['0:Fair, 1:Good, 2:Very good, 3:Premium, 4:Ideal'], range = (-0.75,4.25))
+ax1.set_xticks([0,1,2,3,4])
+ax1.legend(loc=0)
+ax1.set_title('Clasificación por corte')
+
+ax2.hist(df.carat, bins = 15)
+ax2.set_title('Clasificación por quilates')
+
+ax3.hist(df.color, label=['0:Mejor color, 6:Peor color'], bins = 14, range = (-0.75,6.25))
+ax3.set_xticks([0,1,2,3,4,5,6])
+ax3.legend(loc=0)
+ax3.set_title('Clasificación por color')
+
+ax4.hist(df.clarity, label=['0:Peor claridad, 7:Mejor claridad'], bins = 16, range = (-0.75,7.25))
+ax4.set_xticks([0,1,2,3,4,5,6,7])
+ax4.legend(loc=0)
+ax4.set_title('Clasificación por claridad')
+                            
+ax5.hist(df.depth, bins=15)
+ax5.set_title('Clasificación por altura relativa')
+                            
+ax6.hist(df.table, bins=15)
+ax6.set_title('Clasificación por ancho relativo');
 
 
 # In[ ]:
 
 
+#A continuación mostramos los principales estadísticos de las variables
+df.describe()
 
+
+# In[ ]:
+
+
+#Veamos, para cada tipo de corte, la media de las características cuantitativas de los diamantes.
+df_res = pd.pivot_table(df, values=['carat', 'depth', 'table', 'x','y','z'], index='cut', aggfunc=np.mean)
+df_res['']=['Fair', 'Good', 'Very Good', 'Premium', 'Ideal'] 
+#añadimos una columna con las cateogrías de calidad de corte correspodientes a cada número
+
+cols = df_res.columns.tolist()
+cols = cols[-1:] + cols[:-1] #ponemos la columna al lado de cut
+
+df_res[cols] 
+
+
+# In[ ]:
+
+
+#Separamos la columna correspondiente a la variable dependiente de las explicativas
+y = df.iloc[:,1]
+X = df.drop(['cut','price'], axis=1)
+
+
+# Vamos a seleccionar un conjunto 'equilibrado' (mediante el stratify) para, más tarde, analizar las predicciones que hace el modelo sobre él. 
+# 
+# ¿Por qué 'equilibrado'? En la representación gráfica vimos que los cortes Fair y Good son menos frecuentes. Por tanto, si seleccionamos un fragmendo cualquiera podrían no aparecer. Como ejemplo parece más interesante evaluar el modelo en un dataframe que contenga todos los tipos de corte.
+
+# In[ ]:
+
+
+from sklearn.model_selection import train_test_split
+
+X, X_2, y, y_2 = train_test_split(X,y, test_size = 0.1, stratify=y)
+
+
+# Separamos en train y test para un análisis preliminar de los resultados de los modelos.
+
+# In[ ]:
+
+
+X_train, X_test, y_train, y_test =train_test_split(X,y)
 
 
 # ### 2. Uso y validación de modelos

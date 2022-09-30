@@ -172,5 +172,8 @@ dependencies:
   - zlib=1.2.12=h4dc903c_3
   - zstd=1.5.2=hcb37349_0
   - pip:
+    - joblib==1.2.0
     - pyqt5-sip==12.11.0
+    - scikit-learn==1.1.2
+    - threadpoolctl==3.1.0
 prefix: /opt/anaconda3/envs/diamonds
