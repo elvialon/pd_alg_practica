@@ -339,42 +339,117 @@ cv.fit(X, y)
 cv.best_score_, cv.best_params_
 
 
-# In[ ]:
-
-
-
-
+# Aunque para ambos modelos obtenemos resultados parecidos, Gradient Boosting Classifier alcanza la mayor precisión [0.798] entre todas las posibilidades analizadas para un máximo de 8 nodos en el árbol y un número de 100 estimadores.
 
 # In[ ]:
 
 
+cv.best_estimator_
 
+
+# ## Ejemplo:
+# Veamos ahora qué tal predice el mejor modelo encontrado con GridSearchCV para el ejemplo anteriormente seleccionado.
+# 
+# * Recordemos que 'Fair', 'Good', 'Very Good', 'Premium' y 'Ideal' se corresponden con los números del 0 al 4 respectivamente. 
+
+# In[ ]:
+
+
+y_pred = cv.predict(X_2)
 
 
 # In[ ]:
 
 
+cv.score(X_2, y_2) #Obtenemos una accuracy buena (en relación a los resultados que hemos ido teniendo)
 
-
-
-# ### 3. Conclusiones
-# 
-# Incluye un párrafo describiendo lo anterior y la utilidad (o no) de los modelos para tus datos en cuestión, y sus posibles aplicaciones al mundo real.
-
-# ### Valoración
-# 
-# Esta práctica se valorará con un máximo de 10 puntos, teniendo un peso igual que las tres anteriores (cada práctica es por tanto el 10% de la nota).
-# 
-# Para la valoración, se tendrá en cuenta:
-# 
-# * Corrección y coherencia del código al dataset seleccionado.
-# 
-# * Simplicidad del código (evita bucles innecesarios, utiliza funciones ya implementadas en las librerías en vez de rehacerlas a mano, etc).
-# 
-# * Comentarios que expliquen cada paso que haces.
 
 # In[ ]:
 
 
+from sklearn.metrics import confusion_matrix
+
+print(confusion_matrix(y_2, y_pred))
+print('')
+print('Fair, Good, Very Good, Premium, Ideal')
 
 
+# In[ ]:
+
+
+my_array = confusion_matrix(y_2, y_pred)
+
+
+# Como no es una variable binaria no hay un comando de python que extraiga directamente falsos negativos, falsos positivos, etc., por lo que lo programamos.
+
+# In[ ]:
+
+
+#Verdaderos cortes tipo j mal clasificados como i
+cortes = ['Fair','Good','Very Good', 'Premium', 'Ideal'] 
+print('False discovery rate:') #Tasa de error tipo I
+for j in range(0,5):
+    print('El porcentaje de diamantes de tipo', cortes[j], 'mal clasificados es del', 1 - my_array[j,j]/my_array[:,j].sum())
+
+
+# In[ ]:
+
+
+#Verdaderos cortes tipo mal clasificados como i
+print('False omission rate:') #Tasa error tipo II
+for i in range(0,5):
+    print('El porcentaje de diamantes mal clasificados como',cortes[i],'es del', 1 - my_array[i,i]/my_array[i,:].sum())
+
+
+# Las calidades que clasifica mejor son 'Fair' e 'Ideal', es decir, los dos extremos. Por otro lado, podemos ver que el modelo confunde más frecuentemente las calidades medias tanto como falsos negativos como falsos positivios (mirando dos a dos los tipos de corte), principalmente si son calidades contiguas. En total, la calidad que peor clasifica el modelo es 'Very Good', es decir, la calidad media, que incluso confunde en no pocas ocasiones con la máxima calidad, 'Ideal' (vemos que tiene una *false discovery rate* de 30% y una *false omission rate* del 40%).
+
+
+cv.score(X_2, y_2) #Obtenemos una accuracy buena (en relación a los resultados que hemos ido teniendo)
+
+
+# In[ ]:
+
+
+from sklearn.metrics import confusion_matrix
+
+print(confusion_matrix(y_2, y_pred))
+print('')
+print('Fair, Good, Very Good, Premium, Ideal')
+
+
+# In[ ]:
+
+
+my_array = confusion_matrix(y_2, y_pred)
+
+
+# Como no es una variable binaria no hay un comando de python que extraiga directamente falsos negativos, falsos positivos, etc., por lo que lo programamos.
+
+# In[ ]:
+
+
+#Verdaderos cortes tipo j mal clasificados como i
+cortes = ['Fair','Good','Very Good', 'Premium', 'Ideal'] 
+print('False discovery rate:') #Tasa de error tipo I
+for j in range(0,5):
+    print('El porcentaje de diamantes de tipo', cortes[j], 'mal clasificados es del', 1 - my_array[j,j]/my_array[:,j].sum())
+
+
+# In[ ]:
+
+
+#Verdaderos cortes tipo mal clasificados como i
+print('False omission rate:') #Tasa error tipo II
+for i in range(0,5):
+    print('El porcentaje de diamantes mal clasificados como',cortes[i],'es del', 1 - my_array[i,i]/my_array[i,:].sum())
+
+
+# Las calidades que clasifica mejor son 'Fair' e 'Ideal', es decir, los dos extremos. Por otro lado, podemos ver que el modelo confunde más frecuentemente las calidades medias tanto como falsos negativos como falsos positivios (mirando dos a dos los tipos de corte), principalmente si son calidades contiguas. En total, la calidad que peor clasifica el modelo es 'Very Good', es decir, la calidad media, que incluso confunde en no pocas ocasiones con la máxima calidad, 'Ideal' (vemos que tiene una *false discovery rate* de 30% y una *false omission rate* del 40%).
+
+# ## Fase 3. Conclusiones.
+
+# En este trabajo hemos querido encontrar un modelo que prediga la clasificación de los diamantes según la calidad de corte de la forma más precisa posible en función de los quilates, el color, la claridad, y las dimensiones del diamante. Para ello, hemos analizado los resultados de Decision Tree Classifier, Random Forest Classifier, GradientBoostingClassifier y MLP Classifier. La base de datos utilizada contiene información de casi 54.000 diamantes, una muestra grande con proporciones de cada clase suficientemente representativas.
+# 
+# En un primer momento, para unos datos de train y de test aleatorios, los modelos que han hecho predicciones más precisas han sido Random Forest Classifier [accuracy: 0.783] y el Gradient Boosting Classifier [accuracy: 0.767]. Tras hacer un análisis más profundo con GridSearchCV, el modelo Gradient Boosting Classifier con máximo 5 nodos y un número de 200 estimadores ha demostrado ser el mejor para este gran conjunto de datos.  
+# 
+# Al analizar sobre un ejemplo las predicciones hechas por este modelo seleccionado, comprobamos que la precisión baja significativamente a la hora de clasificar diamantes con cortes de calidades intermedias. Por tanto, parece razonable pensar que, aunque la clasificación es relativamente buena en general, lo más aconsejable (y fiable) en la práctica sería usar el modelo solamente para distinguir entre calidades extremas, es decir, los mejores diamantes de los peores.
